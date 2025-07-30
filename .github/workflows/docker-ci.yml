@@ -44,6 +44,7 @@ jobs:
       - name: Run backend container (test only)
         run: |
           docker run -d --name test-backend \
+            -p 5001:5001 \
             -e MONGO_URI=mongodb://localhost:27017/tododb \
             todoapp-backend
 
