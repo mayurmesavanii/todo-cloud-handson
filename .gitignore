@@ -1,5 +1,19 @@
-# .gitignore
-node_modules
+# Node dependencies
+node_modules/
+npm-debug.log
+
+# dotenv env file
 .env
-*.log
-.vscode
+
+# OS junk
+.DS_Store
+
+# Editor junk
+.vscode/
+.idea/
+*.swp
+
+# Production builds
+dist/
+build/
+
