@@ -44,14 +44,14 @@ jobs:
         run: |
           docker build -t todoapp-backend ./server
 
-      - name: Run backend container (test only)
+       - name: Run backend container (test only)
         run: |
           docker run -d --name test-backend \
-            --network host \
             -e MONGO_URI=mongodb://localhost:27017/tododb \
             todoapp-backend
 
-      - name: Wait and test backend health (optional)
+      - name: Test backend inside container
         run: |
           sleep 10
-          curl --fail http://localhost:5001/api/tasks || (echo "❌ Backend not reachable" && exit 1)
+          docker exec test-backend curl --fail http://localhost:5001/api/tasks || (echo "❌ Backend not reachable inside container" && exit 1)
+
