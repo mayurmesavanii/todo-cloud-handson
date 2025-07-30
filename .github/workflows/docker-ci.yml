@@ -13,12 +13,25 @@ jobs:
     services:
       mongo:
         image: mongo
-        ports: ['27017:27017']
-        options: --health-cmd "mongo --eval 'db.stats()'" --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # 🔧 Install mongosh for healthcheck support
+      - name: Install mongosh
+        run: |
+          wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+          sudo apt-get update
+          sudo apt-get install -y mongodb-mongosh
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -33,10 +46,12 @@ jobs:
 
       - name: Run backend container (test only)
         run: |
-          docker run -d --name test-backend --network host -e MONGO_URI=mongodb://localhost:27017/tododb todoapp-backend
+          docker run -d --name test-backend \
+            --network host \
+            -e MONGO_URI=mongodb://localhost:27017/tododb \
+            todoapp-backend
 
-      - name: Wait and test backend health (optional ping route)
+      - name: Wait and test backend health (optional)
         run: |
           sleep 10
-          curl http://localhost:5001/api/tasks || echo "App not reachable yet"
-
+          curl --fail http://localhost:5001/api/tasks || (echo "❌ Backend not reachable" && exit 1)
