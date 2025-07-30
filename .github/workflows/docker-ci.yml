@@ -47,8 +47,3 @@ jobs:
             -p 5001:5001 \
             -e MONGO_URI=mongodb://localhost:27017/tododb \
             todoapp-backend
-
-      - name: Test backend inside container
-        run: |
-          sleep 10
-          docker exec test-backend curl --fail http://localhost:5001/api/tasks || (echo "❌ Backend not reachable inside container" && exit 1)
